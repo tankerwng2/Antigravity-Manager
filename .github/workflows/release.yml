@@ -95,12 +95,12 @@ jobs:
         run: npm install
 
       - name: Build the app
-        uses: tauri-apps/tauri-action@v2
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v3.2.4 # 由于 v3.2.3 已经占用了资源，我们强制推送一个新的版本号
-          releaseName: 'Antigravity Tools v3.2.4'
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Antigravity Tools ${{ github.ref_name }}'
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
