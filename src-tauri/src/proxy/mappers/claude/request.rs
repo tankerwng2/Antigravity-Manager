@@ -201,10 +201,22 @@ pub fn transform_claude_request_in(
         }
     }
 
-    // [FIX #295] If thinking enabled but no signature available for function calls,
+    // [FIX #295 & #298] If thinking enabled but no signature available,
     // disable thinking to prevent Gemini 3 Pro rejection
     if is_thinking_enabled {
         let global_sig = get_thought_signature();
+        
+        // Check if there are any thinking blocks in message history
+        let has_thinking_history = claude_req.messages.iter().any(|m| {
+            if m.role == "assistant" {
+                if let MessageContent::Array(blocks) = &m.content {
+                    return blocks.iter().any(|b| matches!(b, ContentBlock::Thinking { .. }));
+                }
+            }
+            false
+        });
+        
+        // Check if there are function calls in the request
         let has_function_calls = claude_req.messages.iter().any(|m| {
             if let MessageContent::Array(blocks) = &m.content {
                 blocks
@@ -215,13 +227,25 @@ pub fn transform_claude_request_in(
             }
         });
 
-        if has_function_calls
+        // [FIX #298] For first-time thinking requests (no thinking history),
+        // always check for valid signature to prevent API rejection
+        // [FIX #295] For requests with function calls, also require valid signature
+        let needs_signature_check = !has_thinking_history || has_function_calls;
+        
+        if needs_signature_check
             && !has_valid_signature_for_function_calls(&claude_req.messages, &global_sig)
         {
-            tracing::warn!(
-                "[Thinking-Mode] [FIX #295] No valid signature found for function calls. \
-                 Disabling thinking to prevent Gemini 3 Pro rejection."
-            );
+            if !has_thinking_history {
+                tracing::warn!(
+                    "[Thinking-Mode] [FIX #298] First thinking request without valid signature. \
+                     Disabling thinking to prevent API rejection."
+                );
+            } else {
+                tracing::warn!(
+                    "[Thinking-Mode] [FIX #295] No valid signature found for function calls. \
+                     Disabling thinking to prevent Gemini 3 Pro rejection."
+                );
+            }
             is_thinking_enabled = false;
         }
     }
