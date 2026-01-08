@@ -35,5 +35,13 @@ src-tauri/.env
 .env.*
 environment/
 
-# Reference projects (for development only)
+# Python virtual environments and test files
+.venv*/
+venv/
+*.py
+__pycache__/
+*.pyc
 
+# Reference projects (for development only)
+CLIProxyAPI/
+CodexBar*/

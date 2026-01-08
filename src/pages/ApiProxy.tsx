@@ -1209,7 +1209,7 @@ print(response.text)`;
                                             <BrainCircuit size={18} className="text-blue-500" />
                                             {t('proxy.router.title')}
                                         </h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 whitespace-pre-line">
                                             {t('proxy.router.subtitle')}
                                         </p>
                                     </div>
