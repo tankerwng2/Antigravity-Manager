@@ -117,6 +117,7 @@ pub fn run() {
             commands::import_custom_db,
             commands::sync_account_from_db,
             commands::save_text_file,
+            commands::read_text_file,
             commands::clear_log_cache,
             commands::open_data_folder,
             commands::get_data_dir_path,

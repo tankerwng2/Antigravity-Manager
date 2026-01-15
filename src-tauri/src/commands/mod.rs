@@ -559,6 +559,12 @@ pub async fn save_text_file(path: String, content: String) -> Result<(), String>
     std::fs::write(&path, content).map_err(|e| format!("写入文件失败: {}", e))
 }
 
+/// 读取文本文件 (绕过前端 Scope 限制)
+#[tauri::command]
+pub async fn read_text_file(path: String) -> Result<String, String> {
+    std::fs::read_to_string(&path).map_err(|e| format!("读取文件失败: {}", e))
+}
+
 /// 清理日志缓存
 #[tauri::command]
 pub async fn clear_log_cache() -> Result<(), String> {
