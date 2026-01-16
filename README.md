@@ -235,6 +235,12 @@ print(response.choices[0].message.content)
                 - **数据模型补全**: 为 `OpenAIResponse` 增加了标准的 `usage` 字段。
                 - **全链路映射**: 实现了从流式 (SSE) 和非流式响应中提取并映射 `prompt_tokens`、`completion_tokens` 及 `total_tokens` 的逻辑。
             - **影响范围**: 彻底解决了 Kilo Editor、Claude Code 等工具在使用 OpenAI 协议时无法统计 Token 用量的问题。
+        - **Linux 主题切换崩溃修复 (Pull Request #750, Thanks to @infinitete)**:
+            - **修复内容**: 
+                - 在 Linux 平台禁用不兼容的 `setBackgroundColor` 调用。
+                - 针对 WebKitGTK 环境禁用 View Transition API 以防止透明窗口崩溃。
+                - 启动时自动调整 GTK 窗口 alpha 通道以增强稳定性。
+            - **影响范围**: 解决了 Linux 用户在切换深色/浅色模式时可能遇到的程序卡死或硬崩溃问题。
     *   **v3.3.33 (2026-01-15)**:
         - **Codex 兼容性与模型映射修复 (Fix Issue #697)**:
             - **Instructions 参数支持**: 修复了对 `instructions` 参数的处理逻辑，确保其作为系统指令（System Instructions）正确注入，提升与 Codex 等工具的兼容性。

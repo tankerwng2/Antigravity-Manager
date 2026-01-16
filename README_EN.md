@@ -217,6 +217,12 @@ print(response.choices[0].message.content)
                 - **Data Model Completion**: Added standard `usage` field to `OpenAIResponse`.
                 - **Full-Chain Mapping**: Implemented logic to extract and map `prompt_tokens`, `completion_tokens`, and `total_tokens` from both streaming (SSE) and non-streaming responses.
             - **Impact**: Completely resolved the issue where tools like Kilo Editor and Claude Code could not track token usage when using the OpenAI protocol.
+        - **Linux Theme Switch Crash Fix (Pull Request #750, Thanks to @infinitete)**:
+            - **Fix Details**:
+                - Disabled incompatible `setBackgroundColor` calls on Linux platform.
+                - Disabled View Transition API for WebKitGTK environments to prevent transparent window crashes.
+                - Automatically adjusted GTK window alpha channel at startup for enhanced stability.
+            - **Impact**: Resolved potential program freezes or hard crashes for Linux users when switching between dark/light modes.
     *   **v3.3.33 (2026-01-15)**:
         - **Codex Compatibility & Model Mapping Fix (Fix Issue #697)**:
             - **Instructions Parameter Support**: Fixed the handling of the `instructions` parameter, ensuring it is correctly injected as System Instructions for better compatibility with tools like Codex.
