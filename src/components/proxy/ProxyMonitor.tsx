@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import ModalDialog from '../common/ModalDialog';
 import { useTranslation } from 'react-i18next';
 import { request as invoke } from '../../utils/request';
-import { Trash2, Search, X, Copy, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trash2, Search, X, Copy, CheckCircle, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 
 import { AppConfig } from '../../types/config';
 import { formatCompactNumber } from '../../utils/format';
@@ -234,14 +234,17 @@ export const ProxyMonitor: React.FC<ProxyMonitorProps> = ({ className }) => {
         }
     };
 
+    const pendingLogsRef = useRef<ProxyRequestLog[]>([]);
+
     useEffect(() => {
         loadData();
         let unlistenFn: (() => void) | null = null;
         let updateTimeout: number | null = null;
-        let pendingLogs: ProxyRequestLog[] = [];
 
         const setupListener = async () => {
+            console.debug('[ProxyMonitor] Setting up event listener for proxy://request');
             unlistenFn = await listen<ProxyRequestLog>('proxy://request', (event) => {
+                // console.debug('[ProxyMonitor] Received event:', event);
                 const newLog = event.payload;
 
                 // 移除 body 以减少内存占用
@@ -251,26 +254,27 @@ export const ProxyMonitor: React.FC<ProxyMonitorProps> = ({ className }) => {
                     response_body: undefined
                 };
 
-                // 添加到待处理队列
-                pendingLogs.push(logSummary);
+                // 添加到待处理队列 (Use Ref to avoid closure staleness)
+                pendingLogsRef.current.push(logSummary);
 
                 // 防抖:每 500ms 批量更新一次
                 if (updateTimeout) clearTimeout(updateTimeout);
                 updateTimeout = setTimeout(() => {
-                    if (pendingLogs.length > 0) {
-                        setLogs(prev => [...pendingLogs, ...prev].slice(0, 100)); // 1000 → 100
+                    const currentPending = pendingLogsRef.current;
+                    if (currentPending.length > 0) {
+                        setLogs(prev => [...currentPending, ...prev].slice(0, 100)); // 1000 → 100
 
                         // 批量更新统计
                         setStats((prev: ProxyStats) => {
-                            const successCount = pendingLogs.filter(log => log.status >= 200 && log.status < 400).length;
+                            const successCount = currentPending.filter(log => log.status >= 200 && log.status < 400).length;
                             return {
-                                total_requests: prev.total_requests + pendingLogs.length,
+                                total_requests: prev.total_requests + currentPending.length,
                                 success_count: prev.success_count + successCount,
-                                error_count: prev.error_count + (pendingLogs.length - successCount),
+                                error_count: prev.error_count + (currentPending.length - successCount),
                             };
                         });
 
-                        pendingLogs = [];
+                        pendingLogsRef.current = [];
                     }
                 }, 500);
             });
@@ -390,6 +394,9 @@ export const ProxyMonitor: React.FC<ProxyMonitorProps> = ({ className }) => {
                         <span className="text-red-500">{formatCompactNumber(stats.error_count)} ERR</span>
                     </div>
 
+                    <button onClick={() => loadData(currentPage, filter)} className="btn btn-sm btn-ghost text-gray-400" title={t('common.refresh') || 'Refresh'}>
+                        <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                    </button>
                     <button onClick={clearLogs} className="btn btn-sm btn-ghost text-gray-400">
                         <Trash2 size={16} />
                     </button>

@@ -918,10 +918,7 @@ fn build_contents(
                                 }
 
                                 last_thought_signature = Some(sig.clone());
-                                // [FIX #545] Encode raw signature to Base64 for Gemini
-                                use base64::Engine;
-                                let encoded_sig = base64::engine::general_purpose::STANDARD.encode(sig);
-                                part["thoughtSignature"] = json!(encoded_sig);
+                                part["thoughtSignature"] = json!(sig);
                             }
                             parts.push(part);
                         }
@@ -1020,10 +1017,7 @@ fn build_contents(
                             // Do NOT add skip_thought_signature_validator - Vertex AI rejects it
 
                             if let Some(sig) = final_sig {
-                                // [FIX #545] Encode raw signature to Base64 for Gemini
-                                use base64::Engine;
-                                let encoded_sig = base64::engine::general_purpose::STANDARD.encode(sig);
-                                part["thoughtSignature"] = json!(encoded_sig);
+                                part["thoughtSignature"] = json!(sig);
                             }
                             parts.push(part);
                         }
@@ -1103,11 +1097,8 @@ fn build_contents(
                                 
                                 // [FIX] Tool Result 也需要回填签名（如果上下文中有）
                                 if let Some(sig) = last_thought_signature.as_ref() {
-                                    // [FIX #545] Encode raw signature to Base64 for Gemini
-                                    use base64::Engine;
-                                    let encoded_sig = base64::engine::general_purpose::STANDARD.encode(sig);
                                     if let Some(last_part) = parts.last_mut() {
-                                        last_part["thoughtSignature"] = json!(encoded_sig);
+                                        last_part["thoughtSignature"] = json!(sig);
                                     }
                                 }
                                 
