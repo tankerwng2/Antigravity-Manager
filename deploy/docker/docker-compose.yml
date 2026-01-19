@@ -1,0 +1,19 @@
+services:
+  antigravity:
+    container_name: antigravity-manager
+    build: .
+    ports:
+      - "${NOVNC_PORT:-6080}:${NOVNC_PORT:-6080}"
+      - "8045:8045"
+    environment:
+      - VNC_PASSWORD=${VNC_PASSWORD:-password}
+      - RESOLUTION=${RESOLUTION:-1280x800}
+      - NOVNC_PORT=${NOVNC_PORT:-6080}
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - antigravity_data:/home/antigravity/.antigravity_tools
+    restart: unless-stopped
+
+volumes:
+  antigravity_data:
